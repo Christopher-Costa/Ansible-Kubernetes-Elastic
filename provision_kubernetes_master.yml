@@ -3,13 +3,6 @@
   hosts: 
     - kubernetes_masters
   gather_facts: no
-  vars:
-    - stage: none
   roles:
     - role: kubernetes_server
-      when:
-        - stage == 'provision_master'
-
     - role: kubernetes_master
-      when:
-        - stage == 'provision_master'
