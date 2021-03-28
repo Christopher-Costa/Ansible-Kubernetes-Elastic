@@ -1,0 +1,14 @@
+---
+- name: Query current ClusterRoles
+  become: yes
+  become_user: "{{ kubernetes_admin_user }}"
+  shell: kubectl get ClusterRole
+  register: kube_clusterroles
+  changed_when: no
+
+- name: Install flannel networking plugin
+  become: yes
+  become_user: "{{ kubernetes_admin_user }}"
+  shell: kubectl apply -f {{ flannel_location }}
+  when:
+    - kube_clusterroles.stdout is not regex("\sflannel\s")

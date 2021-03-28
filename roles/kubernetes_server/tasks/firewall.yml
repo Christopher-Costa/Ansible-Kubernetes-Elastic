@@ -1,0 +1,22 @@
+---
+- name: Open firewalld for kubernetes ports
+  become: yes
+  become_user: root
+  firewalld:
+    port: "{{ item }}"
+    permanent: yes
+    immediate: yes
+    state: enabled
+  loop:
+    - 10250/tcp
+    - 10256/tcp
+    - 8472/udp
+
+- name: Enable firewalld masquerade
+  become: yes
+  become_user: root
+  firewalld:
+    masquerade: yes
+    permanent: yes
+    immediate: yes
+    state: enabled

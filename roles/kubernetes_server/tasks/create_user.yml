@@ -1,0 +1,18 @@
+---
+- name: Add kubernetes service group
+  become: yes
+  become_user: root
+  group:
+    name: "{{ kubernetes_service_group }}"
+    gid: "{{ kubernetes_service_gid | int }}"
+    state: present
+
+- name: Add kubernetes service user
+  become: yes
+  become_user: root
+  user:
+    name: "{{ kubernetes_service_user }}"
+    shell: /sbin/nologin
+    uid: "{{ kubernetes_service_uid | int }}"
+    group: "{{ kubernetes_service_group }}"
+    state: present

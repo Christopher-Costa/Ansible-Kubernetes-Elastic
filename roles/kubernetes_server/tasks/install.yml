@@ -1,0 +1,22 @@
+---
+- name: Add kubernetes repository
+  become: yes
+  become_user: root
+  yum_repository:
+    name: kubernetes
+    description: Kubernetes
+    baseurl: https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+    gpgcheck: yes
+    gpgkey:
+      - https://packages.cloud.google.com/yum/doc/yum-key.gpg
+      - https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+
+- name: Install kubernetes packages
+  become: yes
+  become_user: root
+  yum:
+    name:
+      - kubeadm{{ kubernetes_version | default("") | regex_replace('^(.)', '-\1') }}
+      - kubelet{{ kubernetes_version | default("") | regex_replace('^(.)', '-\1') }}
+      - kubectl{{ kubernetes_version | default("") | regex_replace('^(.)', '-\1') }}
+    state: latest

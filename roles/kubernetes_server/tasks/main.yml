@@ -1,0 +1,28 @@
+---
+- include_tasks: firewall.yml
+  tags:
+    - firewall
+
+- include_tasks: create_user.yml
+  tags:
+    - user
+
+- include_tasks: update_docker.yml
+  tags:
+    - docker
+
+- include_tasks: install.yml
+  tags:
+    - install
+
+- include_tasks: configure_sysctl.yml
+  tags:
+    - sysctl
+
+- include_tasks: start.yml
+  tags:
+    - start
+
+- include_tasks: flush_handlers.yml
+  tags:
+    - docker

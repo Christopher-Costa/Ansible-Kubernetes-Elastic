@@ -1,0 +1,34 @@
+---
+- name: Initialize kubernetes cluster
+  become: yes
+  become_user: root
+  shell: >
+    kubeadm init
+    --apiserver-advertise-address={{ ip_address }} 
+    --pod-network-cidr={{ pod_network_cidr }}
+    --service-cidr={{ service_cidr }}
+  args:
+    creates: /etc/kubernetes/manifests/kube-controller-manager.yaml 
+
+- name: Create .kube directory
+  become: yes
+  become_user: "{{ kubernetes_admin_user }}"
+  file:
+    name: ~{{ kubernetes_admin_user}}/.kube
+    state: directory
+
+- name: Copy config file
+  become: yes
+  become_user: root
+  command: cp -i /etc/kubernetes/admin.conf ~{{ kubernetes_admin_user }}/.kube/config
+  args:
+    creates: ~{{ kubernetes_admin_user}}/.kube/config 
+
+- name: Set config file ownership
+  become: yes
+  become_user: root
+  file:
+    path: ~{{ kubernetes_admin_user }}/.kube/config
+    owner: "{{ kubernetes_admin_user }}"
+    group: "{{ kubernetes_admin_group }}"
+    state: file

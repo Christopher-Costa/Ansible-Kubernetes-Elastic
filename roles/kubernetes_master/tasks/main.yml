@@ -1,0 +1,16 @@
+---
+- include_tasks: firewall.yml
+  tags:
+    - firewall
+
+- include_tasks: create_user.yml
+  tags:
+    - user
+
+- include_tasks: initialize.yml
+  tags:
+    - initialize
+
+- include_tasks: networking.yml
+  tags:
+    - networking

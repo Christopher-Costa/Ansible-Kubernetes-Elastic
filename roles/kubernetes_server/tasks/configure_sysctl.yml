@@ -1,0 +1,11 @@
+---
+- name: Set bridge-nf-call-iptables sysctl parameter
+  become: yes
+  become_user: root
+  sysctl:
+    sysctl_file: /etc/sysctl.conf
+    name: net.bridge.bridge-nf-call-iptables
+    value: "1"
+    sysctl_set: yes
+    state: present
+    reload: yes
