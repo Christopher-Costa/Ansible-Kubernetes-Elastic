@@ -11,7 +11,7 @@
       - https://packages.cloud.google.com/yum/doc/yum-key.gpg
       - https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
 
-- name: Install kubernetes packages
+- name: Install kubernetes {{ kubernetes_version | default("") }} packages
   become: yes
   become_user: root
   yum:

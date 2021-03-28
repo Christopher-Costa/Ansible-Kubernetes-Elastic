@@ -14,10 +14,3 @@
     dest: /etc/docker/daemon.json
   notify:
     - restart_docker
-
-- name: Create /etc/systemd/system/docker.service.d directory
-  become: yes
-  become_user: root
-  file:
-    path: /etc/systemd/system/docker.service.d
-    state: directory
