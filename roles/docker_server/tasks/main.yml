@@ -1,0 +1,37 @@
+---
+- name: Install dependencies for Docker
+  become: yes
+  become_user: root
+  yum:
+    name:
+      - yum-utils
+      - lvm2
+      - device-mapper-persistent-data
+    state: latest
+
+- name: Add docker-ce repository
+  become: yes
+  become_user: root
+  yum_repository:
+    name: docker-ce-stable
+    description: Docker CE Stable - $basearch
+    baseurl: https://download.docker.com/linux/centos/7/$basearch/stable
+    gpgcheck: yes
+    gpgkey: https://download.docker.com/linux/centos/gpg
+
+- name: Install docker-ce{{ docker_version | default("") | regex_replace('^(.)', '-\1') }} package
+  become: yes
+  become_user: root
+  yum:
+    name: docker-ce{{ docker_version | default("") | regex_replace('^(.)', '-\1') }}
+    state: present
+  when:
+    - docker_version is defined
+
+- name: Start and Enable docker service
+  become: yes
+  become_user: root
+  systemd:
+    name: docker
+    state: started
+    enabled: yes

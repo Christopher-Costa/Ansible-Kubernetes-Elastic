@@ -1,0 +1,80 @@
+---
+- name: Add Static Hosts Entries
+  hosts:
+    - kubernetes_master
+    - kubernetes_nodes
+  gather_facts: no
+  become: yes
+  become_user: root
+  tasks:
+  - name: Update /etc/hosts
+    blockinfile:
+      path: /etc/hosts
+      block: |
+        {% for host in groups['all'] %}
+        {{ hostvars[host]['ip_address'] }}     {{ host }} {{ host }}.costa.lab
+        {% endfor %}
+    tags:
+    - hosts
+
+- name: Install Docker
+  hosts: 
+    - kubernetes_masters
+    - kubernetes_nodes
+  vars:
+    - docker_version: 19.03.2
+  roles:
+    - role: docker_server
+
+- name: Prepare System for Elasticsearch
+  gather_facts: no
+  hosts: elasticsearch_servers
+  tasks:
+    - name: Add kubernetes group
+      become: yes
+      become_user: root
+      group:
+        name: kubernetes
+        gid: 1000
+        state: present
+
+    - name: Add kubernetes user
+      become: yes
+      become_user: root
+      user:
+        name: kubernetes
+        shell: /sbin/nologin
+        uid: 1000
+        group: kubernetes
+
+    - name: set vm.max_map_count
+      become: yes
+      sysctl:
+        name: vm.max_map_count
+        value: '262144'
+        sysctl_set: yes
+        reload: yes
+        state: present
+
+    - name: clean up old directories
+      become: yes
+      file:
+        state: absent
+        path: /data/{{ item }}
+      loop:
+      - elasticsearch0
+      - elasticsearch1
+      - elasticsearch-master
+
+    - name: create node directories
+      become: yes
+      file:
+        state: directory
+        mode: '0755'
+        owner: kubernetes
+        group: kubernetes
+        path: /data/{{ item }}
+      loop:
+      - elasticsearch0
+      - elasticsearch1
+      - elasticsearch-master
