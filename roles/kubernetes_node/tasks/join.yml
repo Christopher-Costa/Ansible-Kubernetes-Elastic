@@ -1,0 +1,15 @@
+---
+- name: Query the join command
+  delegate_to: "{{ kubernetes_master }}"
+  become: yes
+  become_user: "{{ kubernetes_admin_user }}"
+  shell: kubeadm token create --print-join-command
+  register: kubernetes_cluster_join_command
+  changed_when: no
+
+- name: Join cluster
+  become: yes
+  become_user: root
+  shell: "{{ kubernetes_cluster_join_command.stdout }}"
+  args:
+    creates: /etc/kubernetes/kubelet.conf
