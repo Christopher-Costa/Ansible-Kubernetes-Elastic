@@ -1,0 +1,58 @@
+---
+- hosts: kubernetes_nodes
+  gather_facts: no
+  tasks:
+    - name: Install docker-py
+      become: yes
+      yum:
+        name: python-docker-py
+        state: present
+
+    - name: Get Rancher Container Id
+      become: yes
+      shell: docker images rancher/rancher --no-trunc -q
+      register: image
+
+    - name: List containers
+      become: yes
+      shell: docker ps -a -q
+      register: docker_ps_a_q
+
+    - name: Query the list of containers
+      become: yes
+      docker_container_info:
+        name: "{{ item }}"
+      loop: "{{ docker_ps_a_q.stdout_lines }}"  
+      register: docker_container_info
+
+    - name: Remove all but the Rancher container
+      become: yes
+      docker_container:
+        name: "{{ item['container']['Name'] }}"
+        state: absent
+      loop: "{{ docker_container_info.results }}"
+      loop_control:
+        label: "{{  item['container']['Name'] }}"
+      when:
+        - item['container']['Image'] != image.stdout
+
+    - name: Cleanup old files
+      become: yes
+      file:
+        name: "{{ item }}"
+        state: absent
+      loop:
+        - /var/lib/kubelet
+        - /var/lib/cni
+        - /var/lib/etcd
+        - /var/lib/calico
+        - /var/lib/rancher
+        - /etc/cni
+        - /etc/ceph
+        - /etc/kubernetes
+        - /opt/cni
+        - /opt/rke
+        - /run/calico
+        - /run/secrets/kubernetes.io
+        - /var/run/calico
+        - /var/lib/rancher/rke/log
