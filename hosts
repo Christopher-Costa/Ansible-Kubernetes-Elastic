@@ -1,0 +1,18 @@
+[kubernetes_masters]
+master ip_address=10.10.111.110
+
+[elasticsearch_servers]
+elastic-1-1 ip_address=10.10.111.111
+elastic-1-2 ip_address=10.10.111.112
+elastic-2-1 ip_address=10.10.111.113
+elastic-2-2 ip_address=10.10.111.114
+
+[arkime_servers]
+capture-1 ip_address=10.10.111.115
+capture-2 ip_address=10.10.111.116
+
+[kubernetes_nodes:children]
+elasticsearch_servers
+
+[kubernetes_nodes:vars]
+kubernetes_master: master
