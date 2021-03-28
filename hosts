@@ -15,4 +15,8 @@ capture-2 ip_address=10.10.111.116
 elasticsearch_servers
 
 [kubernetes_nodes:vars]
-kubernetes_master: master
+kubernetes_master=master
+
+[all:vars]
+kubernetes_version=1.20.5-0
+kubernetes_admin_user=kubeadm
