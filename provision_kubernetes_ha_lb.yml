@@ -1,0 +1,7 @@
+---
+- name: Provision Kubernetes Load Balancer
+  hosts: 
+    - kubernetes_load_balancers
+  gather_facts: no
+  roles:
+    - role: kubernetes_load_balancer
