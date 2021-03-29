@@ -1,0 +1,8 @@
+---
+- name: Install HAProxy
+  become: yes
+  become_user: root
+  yum:
+    name:
+      - haproxy
+    state: latest

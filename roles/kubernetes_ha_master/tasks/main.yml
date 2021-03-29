@@ -1,0 +1,25 @@
+---
+- include_tasks: firewall.yml
+  tags:
+    - firewall
+
+- include_tasks: create_user.yml
+  tags:
+    - user
+
+- block:
+    - include_tasks: initialize.yml
+      tags: initialize
+ 
+    - include_tasks: setup_user.yml
+
+    - include_tasks: networking.yml
+      tags: networking
+  when: bootstrap is defined and bootstrap == "true"
+
+- block:
+    - include_tasks: join.yml
+      tags: join
+
+    - include_tasks: setup_user.yml
+  when: bootstrap is not defined or ( bootstrap is defined and bootstrap != "true")

@@ -1,0 +1,8 @@
+---
+- name: Restart HAProxy
+  listen: restart_haproxy
+  become: yes
+  become_user: root
+  systemd:
+    name: haproxy
+    state: restarted

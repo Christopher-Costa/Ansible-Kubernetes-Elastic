@@ -1,0 +1,23 @@
+---
+- name: Query the join command
+  delegate_to: "{{ kubernetes_bootstrap_master }}"
+  become: yes
+  become_user: "{{ kubernetes_admin_user }}"
+  shell: kubeadm token create --print-join-command
+  register: kubernetes_cluster_join_command
+  changed_when: no
+  tags:
+    - joing
+
+- name: Join Master to cluster
+  become: yes
+  become_user: root
+  shell: >
+    {{ kubernetes_cluster_join_command.stdout }} 
+    --control-plane 
+    --apiserver-advertise-address {{ ip_address }}
+    --certificate-key {{ hostvars[kubernetes_bootstrap_master].kubernetes_certificate_key }}
+  args:
+    creates: /etc/kubernetes/kubelet.conf
+  tags:
+    - join

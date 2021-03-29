@@ -1,0 +1,9 @@
+---
+- name: Open HAProxy ports in Firewalld
+  become: yes
+  become_user: root
+  firewalld:
+    port: 6443/tcp
+    state: enabled
+    permanent: yes
+    immediate: yes

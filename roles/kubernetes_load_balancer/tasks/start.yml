@@ -1,0 +1,8 @@
+---
+- name: Start HAProxy
+  become: yes
+  become_user: root
+  systemd:
+    name: haproxy
+    state: started
+    enabled: yes

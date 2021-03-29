@@ -1,0 +1,9 @@
+---
+- name: Configure HAProxy
+  become: yes
+  become_user: root
+  blockinfile:
+    block: "{{ lookup('template', 'haproxy.cfg.j2') }}"
+    marker: "# {mark} ANSIBLE MANAGED HAPROXY CONFIGURATION"
+    path: /etc/haproxy/haproxy.cfg
+  notify: restart_haproxy

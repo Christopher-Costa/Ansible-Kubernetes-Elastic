@@ -1,0 +1,22 @@
+---
+- name: Initialize kubernetes cluster
+  become: yes
+  become_user: root
+  shell: >
+    kubeadm init
+    --control-plane-endpoint={{ load_balancer_ip_address }}
+    --upload-certs
+    --apiserver-advertise-address={{ ip_address }} 
+    --pod-network-cidr={{ pod_network_cidr }}
+    --service-cidr={{ service_cidr }}
+  args:
+    creates: /etc/kubernetes/manifests/kube-controller-manager.yaml 
+  tags:
+    - initialize
+  register: kubernetes_kubeadm_init
+
+- name: "Set the certificate-key variable"
+  set_fact:
+    kubernetes_certificate_key: "{{ kubernetes_kubeadm_init.stdout | regex_replace('^[\\s\\S]+--certificate-key\\s+(\\S+)\\s+[\\s\\S]+$', '\\1') }}"
+  tags:
+    - initialize

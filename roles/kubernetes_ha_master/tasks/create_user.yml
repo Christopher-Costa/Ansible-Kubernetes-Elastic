@@ -1,0 +1,19 @@
+---
+- name: Add kubernetes services group
+  become: yes
+  become_user: root
+  group:
+    name: "{{ kubernetes_admin_group }}"
+    state: present
+  tags:
+    - user
+
+- name: Add kubernetes services user
+  become: yes
+  become_user: root
+  user:
+    name: "{{ kubernetes_admin_user }}"
+    group: "{{ kubernetes_admin_group }}"
+    state: present
+  tags:
+    - user

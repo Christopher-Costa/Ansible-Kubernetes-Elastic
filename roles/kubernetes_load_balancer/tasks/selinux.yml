@@ -1,0 +1,8 @@
+---
+- name: Set SELinux boolean for HAProxy
+  become: yes
+  become_user: root
+  seboolean:
+    name: haproxy_connect_any
+    state: yes
+    persistent: yes
