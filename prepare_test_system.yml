@@ -1,7 +1,8 @@
 ---
 - name: Add Static Hosts Entries
   hosts:
-    - kubernetes_master
+    - kubernetes_load_balancers
+    - kubernetes_masters
     - kubernetes_nodes
   gather_facts: no
   become: yes
