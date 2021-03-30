@@ -1,0 +1,9 @@
+---
+- name: Configure Elasticsearch Kubernetes Deployment
+  hosts: 
+    - "{{ groups['kubernetes_masters'] | random }}"
+  gather_facts: no
+  vars:
+    kubernetes_admin_user: kubeadm
+  roles:
+    - role: elasticsearch_k8s_deployment
