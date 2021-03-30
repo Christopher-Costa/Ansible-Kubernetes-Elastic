@@ -1,0 +1,9 @@
+---
+- name: Provision Kubernetes Nodes
+  hosts:
+    - kubernetes_nodes
+  gather_facts: no
+  roles:
+    - role: kubernetes_server
+    - role: kubernetes_node
+      
