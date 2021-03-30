@@ -1,0 +1,17 @@
+- name: Clean up old Elasticsearch directories
+  become: yes
+  file:
+    state: absent
+    path: "{{ item }}"
+  loop: "{{ elasticsearch_dirs }}"
+  when: clean_elasticsearch | bool
+
+- name: create new Elasticsearch directories
+  become: yes
+  file:
+    state: directory
+    mode: '0755'
+    owner: "{{ elasticsearch_user }}"
+    group: "{{ elasticsearch_group }}"
+    path: "{{ item }}"
+  loop: "{{ elasticsearch_dirs }}"

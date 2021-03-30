@@ -1,0 +1,19 @@
+---
+- name: set vm.max_map_count
+  become: yes
+  become_user: root
+  sysctl:
+    name: vm.max_map_count
+    value: '262144'
+    sysctl_file: /etc/sysctl.d/00-elasticsearch
+    reload: yes
+    state: present
+
+- name: Set maximum number of open files
+  become: yes
+  become_user: root
+  pam_limits:
+    domain: "{{ elasticsearch_user }}"
+    limit_type: '-'
+    limit_item: nofile
+    value: 65535

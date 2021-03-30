@@ -1,0 +1,6 @@
+---
+clean_elasticsearch: 'no'
+elasticsearch_user: elasticsearch
+elasticsearch_group: elasticsearch
+elasticsearch_dirs:
+  - /usr/share/elasticsearch/data
