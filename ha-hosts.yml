@@ -32,11 +32,40 @@ all:
         load_balancer_ip_address: 10.10.111.130
 
     kubernetes_nodes:
-      hosts:
-        worker1: 
-          ip_address: 10.10.111.134
-        worker2:
-          ip_address: 10.10.111.135
+      children:
+        elasticsearch:
+          children:
+            site1:
+              hosts:
+                worker1.costa.lab: 
+                  ip_address: 10.10.111.134
+                worker2.costa.lab:
+                  ip_address: 10.10.111.135
+
+###################################
+# elasticsearch site1 vars
+###################################
+              vars:
+                site: site1
+                cluster: site1
+                namespace: site1
+                nodeport: 32001
+
+            site2:
+              hosts:
+                worker3.costa.lab:
+                  ip_address: 10.10.111.136
+                worker4.costa.lab:
+                  ip_address: 10.10.111.137
+
+###################################
+# elasticsearch site2 vars
+###################################
+              vars:
+                site: site2
+                cluster: site2
+                namespace: site2
+                nodeport: 32002
 
 ###################################
 # kubernetes_nodes vars
@@ -48,6 +77,7 @@ all:
         elasticsearch_dirs:
           - /data/elasticsearch0
           - /data/elasticsearch1
+          - /data/elasticsearch-master
 
 ##################################
 # all vars
