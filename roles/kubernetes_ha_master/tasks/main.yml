@@ -1,4 +1,8 @@
 ---
+- include_tasks: dependencies.yml
+  tags:
+    - dependency
+
 - include_tasks: firewall.yml
   tags:
     - firewall
