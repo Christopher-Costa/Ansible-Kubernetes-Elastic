@@ -1,0 +1,118 @@
+---
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: elastic-master-bs
+  namespace: {{ namespace }}
+  labels:
+    role: master
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      role: master
+  template:
+    metadata:
+      labels:
+        site: {{ site }}
+        role: master
+    spec:
+      nodeSelector:
+        site: {{ site }}
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - { key: role, operator: In, values: [master] }
+            topologyKey: kubernetes.io/hostname
+
+      containers:
+      - name: elastic-master
+        image: docker.elastic.co/elasticsearch/elasticsearch:7.11.0
+
+        env:
+        - name: cluster.name
+          value: {{ cluster }}
+        - name: node.name
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: discovery.seed_hosts
+          value: elastic-master
+        - name: ES_JAVA_OPTS
+          value: -Xms512m -Xmx512m
+        - name: node.roles
+          value: "master"
+        - name: xpack.security.http.ssl.enabled
+          value: "true"
+        - name: xpack.security.http.ssl.key
+          value: /usr/share/elasticsearch/config/tls/tls.key
+        - name: xpack.security.http.ssl.certificate
+          value: /usr/share/elasticsearch/config/tls/tls.crt
+        - name: xpack.security.http.ssl.certificate_authorities
+          value: /usr/share/elasticsearch/config/tls/ca.cert
+        - name: xpack.security.http.ssl.verification_mode
+          value: certificate
+        - name: xpack.security.transport.ssl.enabled
+          value: "true"
+        - name: xpack.security.transport.ssl.key
+          value: /usr/share/elasticsearch/config/tls/tls.key
+        - name: xpack.security.transport.ssl.certificate
+          value: /usr/share/elasticsearch/config/tls/tls.crt
+        - name: xpack.security.transport.ssl.certificate_authorities
+          value: /usr/share/elasticsearch/config/tls/ca.cert
+        - name: xpack.security.transport.ssl.verification_mode
+          value: certificate
+
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 9200
+          initialDelaySeconds: 90
+          periodSeconds: 10
+
+        ports:
+        - containerPort: 9200
+          protocol: TCP
+          name: elastic-rest
+        - containerPort: 9300
+          protocol: TCP
+          name: elastic-ctrl
+
+        volumeMounts:
+        - name: data
+          mountPath: /usr/share/elasticsearch/data
+        - name: tls
+          mountPath: /usr/share/elasticsearch/config/tls
+
+      volumes:
+      - name: data
+        hostPath:
+          path: {{ master_volume }}
+          type: ""
+      - name: tls
+        secret:
+          secretName: elastic-certs 
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: elastic-master
+  namespace: {{ namespace }}
+spec:
+  selector:
+    site: {{ site }}
+    role: master
+  ports:
+  - name: elastic-ctrl
+    port: 9300
+    targetPort: 9300
+    protocol: TCP        
+  - name: elastic-rest
+    port: 9200
+    targetPort: 9200
+    protocol: TCP        
+  clusterIP: None        

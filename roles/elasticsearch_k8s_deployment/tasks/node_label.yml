@@ -1,0 +1,24 @@
+---
+- name: Create configuration file for Elasticsearch master pods
+  delegate_to: localhost
+  template:
+    src: templates/nodelabel.j2
+    dest: "{{ item }}-test.yml"
+  vars:
+    node_name: "{{ item }}"
+    site: "{{ hostvars[item].site }}"
+  loop:  "{{ groups['kubernetes_nodes'] }}"
+
+- name: Apply configuration Elasticsearch master pods
+  become: yes
+  become_user: "{{ kubernetes_admin_user }}"
+  k8s:
+    state: present
+    definition: "{{ lookup('template', 'nodelabel.j2') }}"
+    validate:
+      fail_on_error: no
+      strict: yes
+  vars:
+    node_name: "{{ item }}"
+    site: "{{ hostvars[item].site }}"
+  loop:  "{{ groups['kubernetes_nodes'] }}"
