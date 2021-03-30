@@ -1,0 +1,58 @@
+all:
+  children:
+    kubernetes_load_balancers:
+      hosts:
+        loadbalancer:
+          ip_address: 10.10.111.130
+
+    kubernetes_masters:
+      children:
+        kubernetes_bootstrap_masters:
+          hosts:
+            master1:
+              ip_address: 10.10.111.131 
+
+###################################
+# kubernetes_bootstrap_masters vars
+###################################
+          vars:
+            bootstrap: True
+
+      hosts:
+        master2: 
+          ip_address: 10.10.111.132
+        master3: 
+          ip_address: 10.10.111.133
+
+###################################
+# kubernetes_masters vars
+###################################
+      vars:
+        kubernetes_bootstrap_master: master1
+        load_balancer_ip_address: 10.10.111.130
+
+    kubernetes_nodes:
+      hosts:
+        worker1: 
+          ip_address: 10.10.111.134
+        worker2:
+          ip_address: 10.10.111.135
+
+###################################
+# kubernetes_nodes vars
+###################################
+      vars:
+        kubernetes_master: master1
+        elasticsearch_user: kubernetes
+        elasticsearch_group: kubernetes
+        elasticsearch_dirs:
+          - /data/elasticsearch0
+          - /data/elasticsearch1
+
+##################################
+# all vars
+##################################
+  vars:
+    docker_version: 19.03.2
+    kubernetes_version: 1.20.5-0
+    kubernetes_admin_user: kubeadm
