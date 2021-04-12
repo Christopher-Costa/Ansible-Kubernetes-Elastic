@@ -1,3 +1,9 @@
+## Background
+
+This is an active (and not yet complete) project where I'm testing out Kubernetes deployments for Elasticsearch, and approaches for easily migrating from Rancher.
+
+## Notes from Testing
+
 ### Initializing Rancher
 
 To initialize Rancher on one of the nodes:
