@@ -24,7 +24,7 @@ spec:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
             - matchExpressions:
-              - { key: kubernetes.io/hostname, operator: In, values: [{{ inventory_hostname }}] }
+              - { key: kubernetes.io/hostname, operator: In, values: [{{ node }}] }
 
       hostname: {{ podname }}
       containers:

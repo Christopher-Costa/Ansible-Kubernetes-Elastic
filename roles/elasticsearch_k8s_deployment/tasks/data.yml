@@ -1,0 +1,8 @@
+---
+- name: Handle all Elasticsearch data nodes
+  include: data_node.yml
+  loop: "{{ groups['elasticsearch'] }}"
+  loop_control:
+    loop_var: host_item
+  tags:
+    - data

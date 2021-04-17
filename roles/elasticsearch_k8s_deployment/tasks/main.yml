@@ -10,3 +10,7 @@
 - include_tasks: master.yml
   tags:
     - master
+
+- include_tasks: data.yml
+  tags:
+    - data

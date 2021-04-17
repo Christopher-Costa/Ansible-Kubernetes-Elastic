@@ -1,0 +1,40 @@
+- name: Create Elasticsearch {{ host_item }} Data Node Configuration Files
+  delegate_to: localhost
+  template:
+    src: templates/data.j2
+    dest: configs/{{ podname }}-data.yml
+  vars:
+    volume: "{{ item['volume'] }}"
+    podname: "{{ hostvars[host_item].name }}-{{ item['index'] }}"
+    namespace: "{{ hostvars[host_item].namespace }}"
+    site: "{{ hostvars[host_item].site }}"
+    cluster: "{{ hostvars[host_item].cluster }}"
+    node: "{{ host_item }}"
+  loop: "{{ hostvars[host_item].elastic_data_volumes }}"
+  loop_control:
+    label: "{{ podname }}"
+  tags:
+    - data
+  when: create_config_files | bool
+
+- name: Apply Elasticsearch {{ host_item }} Data Node Configuration
+  become: yes
+  become_user: "{{ kubernetes_admin_user }}"
+  k8s:
+    state: present
+    definition: "{{ lookup('template', 'data.j2') }}"
+    validate:
+      fail_on_error: no
+      strict: yes
+  vars:
+    volume: "{{ item['volume'] }}"
+    podname: "{{ hostvars[host_item].name }}-{{ item['index'] }}"
+    namespace: "{{ hostvars[host_item].namespace }}"
+    site: "{{ hostvars[host_item].site }}"
+    cluster: "{{ hostvars[host_item].cluster }}"
+    node: "{{ host_item }}"
+  loop: "{{ hostvars[host_item].elastic_data_volumes }}"
+  loop_control:
+    label: "{{ podname }}"
+  tags:
+    - data
