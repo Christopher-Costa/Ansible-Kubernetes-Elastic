@@ -1,12 +1,4 @@
 ---
-#- name: Provision Kubernetes Bootstrap Master
-#  hosts: 
-#    - kubernetes_bootstrap_masters
-# gather_facts: no
-# roles:
-#    - role: kubernetes_server
-#    - role: kubernetes_ha_master
-#
 - name: Provision Kubernetes Masters
   hosts:
     - kubernetes_masters
