@@ -6,19 +6,10 @@ all:
           ip_address: 10.10.111.130
 
     kubernetes_masters:
-      children:
-        kubernetes_bootstrap_masters:
-          hosts:
-            master1:
-              ip_address: 10.10.111.131 
-
-###################################
-# kubernetes_bootstrap_masters vars
-###################################
-          vars:
-            bootstrap: True
-
       hosts:
+        master1:
+          ip_address: 10.10.111.131 
+          bootstrap: True
         master2: 
           ip_address: 10.10.111.132
         master3: 
@@ -49,6 +40,7 @@ all:
                 site: site1
                 cluster: site1
                 namespace: site1
+                master_replicas: 3
                 nodeport: 32001
 
             site2:
@@ -65,6 +57,7 @@ all:
                 site: site2
                 cluster: site2
                 namespace: site2
+                master_replicas: 3
                 nodeport: 32002
 
 ###################################
@@ -78,6 +71,7 @@ all:
           - /data/elasticsearch0
           - /data/elasticsearch1
           - /data/elasticsearch-master
+        master_volume: /data/elasticsearch-master
 
 ##################################
 # all vars
