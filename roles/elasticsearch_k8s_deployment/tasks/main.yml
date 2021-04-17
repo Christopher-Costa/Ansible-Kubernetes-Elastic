@@ -1,2 +1,12 @@
 ---
 - include_tasks: node_label.yml
+  tags:
+    - node_label
+
+- include_tasks: namespace.yml
+  tags:
+    - namespace
+
+- include_tasks: master.yml
+  tags:
+    - master

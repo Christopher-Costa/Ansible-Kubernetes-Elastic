@@ -1,0 +1,66 @@
+---
+- name: Assemble Elasticsearch Master Node Configuration Info
+  set_fact:
+    elastic_master_vars: |
+      {{ 
+          elastic_master_vars | default([]) |
+          combine( {hostvars[item].site: {
+            'site': hostvars[item].site,
+            'namespace': hostvars[item].namespace,
+            'cluster': hostvars[item].cluster,
+            'master_volume': hostvars[item].master_volume,
+            'master_replicas': hostvars[item].master_replicas
+          }})
+      }}
+  loop: "{{ groups['elasticsearch'] }}"
+  tags:
+    - master
+
+- name: Create Elasticsearch Master Node Configuration Files
+  delegate_to: localhost
+  template:
+    src: templates/master.j2
+    dest: configs/{{ site }}-elastic-master.yml
+  vars:
+    site: "{{ elastic_master_vars[item]['site'] }}"
+    namespace: "{{ elastic_master_vars[item]['namespace'] }}"
+    master_replicas: "{{ elastic_master_vars[item]['master_replicas'] }}"
+    minimum_masters: "{{ (elastic_master_vars[item]['master_replicas'] / 2 + 1) | int }}"
+    cluster: "{{ elastic_master_vars[item]['cluster'] }}"
+  loop: "{{ elastic_master_vars.keys() | list }}"
+  tags:
+    - master
+
+- name: Create Elasticsearch Master Node Configuration Files
+  delegate_to: localhost
+  template:
+    src: templates/master.j2
+    dest: configs/{{ site }}-elastic-master.yml
+  vars:
+    site: "{{ elastic_master_vars[item]['site'] }}"
+    namespace: "{{ elastic_master_vars[item]['namespace'] }}"
+    master_replicas: "{{ elastic_master_vars[item]['master_replicas'] }}"
+    minimum_masters: "{{ (elastic_master_vars[item]['master_replicas'] / 2 + 1) | int }}"
+    cluster: "{{ elastic_master_vars[item]['cluster'] }}"
+  loop: "{{ elastic_master_vars.keys() | list }}"
+  tags:
+    - master
+
+- name: Apply Elasticsearch Master Node Configuration
+  become: yes
+  become_user: "{{ kubernetes_admin_user }}"
+  k8s:
+    state: present
+    definition: "{{ lookup('template', 'master.j2') }}"
+    validate:
+      fail_on_error: no
+      strict: yes
+  vars:
+    site: "{{ elastic_master_vars[item]['site'] }}"
+    namespace: "{{ elastic_master_vars[item]['namespace'] }}"
+    master_replicas: "{{ elastic_master_vars[item]['master_replicas'] }}"
+    minimum_masters: "{{ (elastic_master_vars[item]['master_replicas'] / 2 + 1) | int }}"
+    cluster: "{{ elastic_master_vars[item]['cluster'] }}"
+  loop: "{{ elastic_master_vars.keys() | list }}"
+  tags:
+    - master

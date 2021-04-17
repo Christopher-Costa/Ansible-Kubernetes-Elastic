@@ -1,0 +1,28 @@
+---
+- name: Create Namespace Configuration Files
+  delegate_to: localhost
+  template:
+    src: templates/namespace.j2
+    dest: configs/{{ namespace }}-namespace.yml
+  vars:
+    namespace: "{{ groups[item] | map('extract', hostvars, 'namespace') | list | first }}"
+  loop: "{{ groups['kubernetes_nodes'] | map('extract', hostvars, 'namespace') | list | unique }}"
+  tags:
+    - namespace
+  when: create_config_files | bool
+
+- name: Apply Namespace Configuration
+  become: yes
+  become_user: "{{ kubernetes_admin_user }}"
+  k8s:
+    state: present
+    definition: "{{ lookup('template', 'namespace.j2') }}"
+    validate:
+      fail_on_error: no
+      strict: yes
+  vars:
+    site: "{{ item }}"
+    namespace: "{{ groups[item] | map('extract', hostvars, 'namespace') | list | first }}"
+  loop: "{{ groups['kubernetes_nodes'] | map('extract', hostvars, 'namespace') | list | unique }}"
+  tags:
+    - namespace
