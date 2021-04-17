@@ -30,7 +30,7 @@ spec:
 
       containers:
       - name: elastic-master
-        image: docker.elastic.co/elasticsearch/elasticsearch:6.8.4
+        image: docker.elastic.co/elasticsearch/elasticsearch:{{ version }}
         env:
         - name: cluster.name
           value: {{ cluster }}
@@ -38,6 +38,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
+{% if version is version('7.0.0', '>=') %}
         - name: discovery.zen.minimum_master_nodes
           value: "{{ minimum_masters }}"
         - name: discovery.zen.ping.unicast.hosts
@@ -50,6 +51,14 @@ spec:
           value: "false"
         - name: node.ingest
           value: "false"
+{% else %}
+        - name: discovery.seed_hosts
+          value: elastic-master
+        - name: ES_JAVA_OPTS
+          value: -Xms512m -Xmx512m
+        - name: node.roles
+          value: "master"
+{% endif %}
         livenessProbe:
           httpGet:
             path: /
@@ -63,24 +72,3 @@ spec:
         - containerPort: 9300
           protocol: TCP
           name: elastic-ctrl
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: elastic-master
-  namespace: {{ namespace }}
-spec:
-  selector:
-    site: {{ site }}
-    role: master
-  ports:
-  - name: elastic-ctrl
-    port: 9300
-    targetPort: 9300
-    protocol: TCP        
-  - name: elastic-rest
-    port: 9200
-    targetPort: 9200
-    protocol: TCP        
-  clusterIP: None        
