@@ -7,12 +7,15 @@ all:
 
     kubernetes_masters:
       hosts:
-        master1:
+        master1.costa.lab:
+          name: master1
           ip_address: 10.10.111.131 
           bootstrap: True
-        master2: 
+        master2.costa.lab:
+          name: master2 
           ip_address: 10.10.111.132
-        master3: 
+        master3.costa.lab:
+          name: master3
           ip_address: 10.10.111.133
 
 ###################################
@@ -29,8 +32,10 @@ all:
             site1:
               hosts:
                 worker1.costa.lab: 
+                  name: worker1
                   ip_address: 10.10.111.134
                 worker2.costa.lab:
+                  name: worker2
                   ip_address: 10.10.111.135
 
 ###################################
@@ -46,8 +51,10 @@ all:
             site2:
               hosts:
                 worker3.costa.lab:
+                  name: worker3
                   ip_address: 10.10.111.136
                 worker4.costa.lab:
+                  name: worker4
                   ip_address: 10.10.111.137
 
 ###################################
@@ -71,7 +78,11 @@ all:
           - /data/elasticsearch0
           - /data/elasticsearch1
           - /data/elasticsearch-master
-        master_volume: /data/elasticsearch-master
+        elastic_master_volume: /data/elasticsearch-master
+        elastic_data_volumes:
+          - { 'index': 0, 'volume': /data/elasticsearch0 }
+          - { 'index': 1, 'volume': /data/elasticsearch1 }
+
 
 ##################################
 # all vars
