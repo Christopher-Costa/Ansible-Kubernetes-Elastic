@@ -5,6 +5,7 @@
       {{ 
           elastic_master_vars | default([]) |
           combine( {hostvars[item].site: {
+            'version': hostvars[item].elasticsearch_version,
             'site': hostvars[item].site,
             'namespace': hostvars[item].namespace,
             'cluster': hostvars[item].cluster,
@@ -16,12 +17,42 @@
   tags:
     - master
 
-- name: Create Elasticsearch Master Node Configuration Files
+- name: Create Elasticsearch Master Service Configuration Files
   delegate_to: localhost
   template:
-    src: templates/master.j2
-    dest: configs/{{ site }}-elastic-master.yml
+    src: templates/master-service.j2
+    dest: configs/{{ site }}-master-service.yml
   vars:
+    site: "{{ elastic_master_vars[item]['site'] }}"
+    namespace: "{{ elastic_master_vars[item]['namespace'] }}"
+  loop: "{{ elastic_master_vars.keys() | list }}"
+  tags:
+    - master
+  when: create_config_files | bool
+
+- name: Apply Elasticsearch Master Service Configuration
+  become: yes
+  become_user: "{{ kubernetes_admin_user }}"
+  k8s:
+    state: present
+    definition: "{{ lookup('template', 'master-service.j2') }}"
+    validate:
+      fail_on_error: no
+      strict: yes
+  vars:
+    site: "{{ elastic_master_vars[item]['site'] }}"
+    namespace: "{{ elastic_master_vars[item]['namespace'] }}"
+  loop: "{{ elastic_master_vars.keys() | list }}"
+  tags:
+    - master
+
+- name: Create Elasticsearch Master ReplicaSet Configuration Files
+  delegate_to: localhost
+  template:
+    src: templates/master-replicaset.j2
+    dest: configs/{{ site }}-master-replicaset.yml
+  vars:
+    version: "{{ elastic_master_vars[item]['version'] }}"
     site: "{{ elastic_master_vars[item]['site'] }}"
     namespace: "{{ elastic_master_vars[item]['namespace'] }}"
     master_replicas: "{{ elastic_master_vars[item]['master_replicas'] }}"
@@ -32,16 +63,17 @@
     - master
   when: create_config_files | bool
 
-- name: Apply Elasticsearch Master Node Configuration
+- name: Apply Elasticsearch Master ReplicaSet Configuration
   become: yes
   become_user: "{{ kubernetes_admin_user }}"
   k8s:
     state: present
-    definition: "{{ lookup('template', 'master.j2') }}"
+    definition: "{{ lookup('template', 'master-replicaset.j2') }}"
     validate:
       fail_on_error: no
       strict: yes
   vars:
+    version: "{{ elastic_master_vars[item]['version'] }}"
     site: "{{ elastic_master_vars[item]['site'] }}"
     namespace: "{{ elastic_master_vars[item]['namespace'] }}"
     master_replicas: "{{ elastic_master_vars[item]['master_replicas'] }}"

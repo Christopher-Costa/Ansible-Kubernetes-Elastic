@@ -1,0 +1,31 @@
+---
+- name: Create Nodeport Configuration Files
+  delegate_to: localhost
+  template:
+    src: templates/nodeport.j2
+    dest: configs/{{ site }}-nodeport.yml
+  vars:
+    site: "{{ groups[item] | map('extract', hostvars, 'site') | list | first }}"
+    namespace: "{{ groups[item] | map('extract', hostvars, 'namespace') | list | first }}"
+    nodeport: "{{ groups[item] | map('extract', hostvars, 'nodeport') | list | first }}"
+  loop: "{{ groups['kubernetes_nodes'] | map('extract', hostvars, 'site') | list | unique }}"
+  tags:
+    - nodeport
+  when: create_config_files | bool
+
+- name: Apply Nodeport Configuration
+  become: yes
+  become_user: "{{ kubernetes_admin_user }}"
+  k8s:
+    state: present
+    definition: "{{ lookup('template', 'nodeport.j2') }}"
+    validate:
+      fail_on_error: no
+      strict: yes
+  vars:
+    site: "{{ groups[item] | map('extract', hostvars, 'site') | list | first }}"
+    namespace: "{{ groups[item] | map('extract', hostvars, 'namespace') | list | first }}"
+    nodeport: "{{ groups[item] | map('extract', hostvars, 'nodeport') | list | first }}"
+  loop: "{{ groups['kubernetes_nodes'] | map('extract', hostvars, 'site') | list | unique }}"
+  tags:
+    - nodeport

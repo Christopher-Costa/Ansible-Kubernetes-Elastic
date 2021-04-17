@@ -14,3 +14,7 @@
 - include_tasks: data.yml
   tags:
     - data
+
+- include_tasks: nodeport.yml
+  tags:
+    - nodeport
