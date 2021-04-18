@@ -19,11 +19,11 @@
 
     - include_tasks: networking.yml
       tags: networking
-  when: bootstrap is defined and bootstrap == "true"
+  when: bootstrap | default(false)
 
 - block:
     - include_tasks: join.yml
       tags: join
 
     - include_tasks: setup_user.yml
-  when: bootstrap is not defined or ( bootstrap is defined and bootstrap != "true")
+  when: not bootstrap | default(false)

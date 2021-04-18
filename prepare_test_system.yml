@@ -18,15 +18,6 @@
     tags:
     - hosts
 
-- name: Install Docker
-  hosts: 
-    - kubernetes_masters
-    - kubernetes_nodes
-  vars:
-    - docker_version: 19.03.2
-  roles:
-    - role: docker_server
-
 - name: Prepare System for Elasticsearch
   gather_facts: no
   hosts: elasticsearch_servers

@@ -22,7 +22,7 @@ all:
 # kubernetes_masters vars
 ###################################
       vars:
-        kubernetes_bootstrap_master: master1
+        kubernetes_bootstrap_master: master1.costa.lab
         load_balancer_ip_address: 10.10.111.130
 
     kubernetes_nodes:

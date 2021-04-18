@@ -18,6 +18,7 @@
   pip:
     name: "{{ item.name }}"
     version: "{{ item.version }}"
+    extra_args: --trusted-host pypi.org --trusted-host files.pythonhosted.org
   loop:
     - { name: "importlib-metadata",  version: "2.0.0" }
     - { name: "configparser",        version: "3.5" }
