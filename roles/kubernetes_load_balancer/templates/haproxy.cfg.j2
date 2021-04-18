@@ -8,9 +8,6 @@ backend kubernetes-backend
     mode tcp
     option tcp-check
     balance roundrobin
-{% for host in groups['kubernetes_bootstrap_masters'] %}
-    server {{ host }} {{ host }}:6443 check fall 3 rise 2
-{% endfor %}
 {% for host in groups['kubernetes_masters'] %}
     server {{ host }} {{ host }}:6443 check fall 3 rise 2
 {% endfor %}
