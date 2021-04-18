@@ -46,7 +46,7 @@ all:
                 site: site1
                 cluster: site1
                 namespace: site1
-                master_replicas: 3
+                master_replicas: 2
                 nodeport: 32001
 
             site2:
@@ -62,11 +62,11 @@ all:
 # elasticsearch site2 vars
 ###################################
               vars:
-                elasticsearch_version: 6.8.4
+                elasticsearch_version: 7.11.0
                 site: site2
                 cluster: site2
                 namespace: site2
-                master_replicas: 3
+                master_replicas: 2
                 nodeport: 32002
 
 ###################################
