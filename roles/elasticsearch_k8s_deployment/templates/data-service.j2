@@ -1,0 +1,15 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ podname }}
+  namespace: {{ namespace }}
+spec:
+  selector:
+    name: {{ podname }}
+  ports:
+  - name: elastic-rest
+    port: 9200
+    targetPort: 9200
+    protocol: TCP        
+  clusterIP: None        

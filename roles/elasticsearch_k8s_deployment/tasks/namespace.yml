@@ -26,3 +26,4 @@
   loop: "{{ groups['kubernetes_nodes'] | map('extract', hostvars, 'namespace') | list | unique }}"
   tags:
     - namespace
+  when: apply_config | bool

@@ -6,5 +6,6 @@
   vars:
     kubernetes_admin_user: kubeadm
     create_config_files: true
+    apply_config: false
   roles:
     - role: elasticsearch_k8s_deployment

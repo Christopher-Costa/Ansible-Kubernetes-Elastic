@@ -1,8 +1,45 @@
-- name: Create Elasticsearch {{ host_item }} Data Node Configuration Files
+---
+- name: Create Elasticsearch {{ host_item }} Service Configuration Files
   delegate_to: localhost
   template:
-    src: templates/data.j2
-    dest: configs/{{ podname }}-data.yml
+    src: templates/data-service.j2
+    dest: configs/{{ podname }}-service.yml
+  vars:
+    podname: "{{ hostvars[host_item].name }}-{{ item['index'] }}"
+    namespace: "{{ hostvars[host_item].namespace }}"
+    site: "{{ hostvars[host_item].site }}"
+  loop: "{{ hostvars[host_item].elastic_data_volumes }}"
+  loop_control:
+    label: "{{ podname }}"
+  tags:
+    - data
+  when: create_config_files | bool
+
+- name: Apply Elasticsearch {{ host_item }} Service
+  become: yes
+  become_user: "{{ kubernetes_admin_user }}"
+  k8s:
+    state: present
+    definition: "{{ lookup('template', 'data-service.j2') }}"
+    validate:
+      fail_on_error: no
+      strict: yes
+  vars:
+    podname: "{{ hostvars[host_item].name }}-{{ item['index'] }}"
+    namespace: "{{ hostvars[host_item].namespace }}"
+    site: "{{ hostvars[host_item].site }}"
+  loop: "{{ hostvars[host_item].elastic_data_volumes }}"
+  loop_control:
+    label: "{{ podname }}"
+  tags:
+    - data
+  when: apply_config | bool
+
+- name: Create Elasticsearch {{ host_item }} Deployment Configuration Files
+  delegate_to: localhost
+  template:
+    src: templates/data-deployment.j2
+    dest: configs/{{ podname }}-deployment.yml
   vars:
     volume: "{{ item['volume'] }}"
     podname: "{{ hostvars[host_item].name }}-{{ item['index'] }}"
@@ -18,12 +55,12 @@
     - data
   when: create_config_files | bool
 
-- name: Apply Elasticsearch {{ host_item }} Data Node Configuration
+- name: Apply Elasticsearch {{ host_item }} Deployment
   become: yes
   become_user: "{{ kubernetes_admin_user }}"
   k8s:
     state: present
-    definition: "{{ lookup('template', 'data.j2') }}"
+    definition: "{{ lookup('template', 'data-deployment.j2') }}"
     validate:
       fail_on_error: no
       strict: yes
@@ -40,3 +77,4 @@
     label: "{{ podname }}"
   tags:
     - data
+  when: apply_config | bool

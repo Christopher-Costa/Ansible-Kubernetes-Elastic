@@ -29,3 +29,4 @@
   loop: "{{ groups['kubernetes_nodes'] | map('extract', hostvars, 'site') | list | unique }}"
   tags:
     - nodeport
+  when: apply_config | bool

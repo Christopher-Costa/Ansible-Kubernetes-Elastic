@@ -20,7 +20,7 @@
 
 - name: Prepare System for Elasticsearch
   gather_facts: no
-  hosts: elasticsearch_servers
+  hosts: elasticsearch
   tasks:
     - name: Add kubernetes group
       become: yes

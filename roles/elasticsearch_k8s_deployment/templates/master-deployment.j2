@@ -1,6 +1,6 @@
 ---
 apiVersion: apps/v1
-kind: ReplicaSet
+kind: Deployment
 metadata:
   name: {{ replicaset_name }}
   namespace: {{ namespace }}
@@ -59,8 +59,6 @@ spec:
 {% endif %}
         - name: discovery.seed_hosts
           value: elastic-master
-        - name: ES_JAVA_OPTS
-          value: -Xms512m -Xmx512m
         - name: node.roles
           value: "master"
 {% endif %}

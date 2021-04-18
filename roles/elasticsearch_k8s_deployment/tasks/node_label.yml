@@ -28,3 +28,4 @@
   loop:  "{{ groups['kubernetes_nodes'] }}"
   tags:
     - node_label
+  when: apply_config | bool

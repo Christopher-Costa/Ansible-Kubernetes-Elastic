@@ -31,7 +31,7 @@
     - master
   when: create_config_files | bool
 
-- name: Apply Elasticsearch Master Service Configuration
+- name: Apply Elasticsearch Master Service
   become: yes
   become_user: "{{ kubernetes_admin_user }}"
   k8s:
@@ -46,6 +46,7 @@
   loop: "{{ elastic_master_vars.keys() | list }}"
   tags:
     - master
+  when: apply_config | bool
 
 # XXX TODO: We don't want to bootstrap everytime.  Need a 
 #           variable or some other check cluster status.
@@ -95,16 +96,16 @@
   loop: "{{ elastic_master_vars.keys() | list }}"
   when: |
     elastic_master_vars[item]['version'] is version('7.0.0', '>=') and
-    create_config_files | bool
+    apply_config | bool
   tags:
     - master
     - bootstrap
 
-- name: Create Elasticsearch Master ReplicaSet Configuration Files
+- name: Create Elasticsearch Master Deployment Configuration Files
   delegate_to: localhost
   template:
     src: templates/master-replicaset.j2
-    dest: configs/{{ site }}-master-replicaset.yml
+    dest: configs/{{ site }}-master-deployment.yml
   vars:
     version: "{{ elastic_master_vars[item]['version'] }}"
     site: "{{ elastic_master_vars[item]['site'] }}"
@@ -119,12 +120,12 @@
     - master
   when: create_config_files | bool
 
-- name: Apply Elasticsearch Master ReplicaSet Configuration
+- name: Apply Elasticsearch Master Deployment Configuration
   become: yes
   become_user: "{{ kubernetes_admin_user }}"
   k8s:
     state: present
-    definition: "{{ lookup('template', 'master-replicaset.j2') }}"
+    definition: "{{ lookup('template', 'master-deployment.j2') }}"
     validate:
       fail_on_error: no
       strict: yes
@@ -140,6 +141,7 @@
   loop: "{{ elastic_master_vars.keys() | list }}"
   tags:
     - master
+  when: apply_config | bool
 
 # XXX TODO: More robust cluster health check
 
@@ -148,6 +150,7 @@
     seconds: 180
   tags:
    - master
+  when: apply_config | bool
 
 - name: Remove the Bootstrap Node
   become: yes
@@ -169,9 +172,9 @@
     replicaset_name: "master-bootstrap"
     role: "master-bootstrap"
   loop: "{{ elastic_master_vars.keys() | list }}"
-  when: |
-    elastic_master_vars[item]['version'] is version('7.0.0', '>=') and
-    create_config_files | bool
   tags:
     - master
     - bootstrap
+  when: |
+    elastic_master_vars[item]['version'] is version('7.0.0', '>=') and
+    apply_config | bool
