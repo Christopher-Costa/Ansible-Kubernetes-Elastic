@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: ReplicaSet
 metadata:
-  name: elastic-master
+  name: {{ replicaset_name }}
   namespace: {{ namespace }}
   labels:
     role: master
@@ -17,6 +17,7 @@ spec:
       labels:
         site: {{ site }}
         role: master
+        service: {{ service | default('master') }}
     spec:
       nodeSelector:
         site: {{ site }}
@@ -25,7 +26,7 @@ spec:
           requiredDuringSchedulingIgnoredDuringExecution:
           - labelSelector:
               matchExpressions:
-              - { key: role, operator: In, values: [master] }
+              - { key: service, operator: In, values: [{{ service | default('master')}}] }
             topologyKey: kubernetes.io/hostname
 
       containers:
@@ -38,13 +39,11 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
-{% if version is version('7.0.0', '>=') %}
+{% if version is version('7.0.0', '<') %}
         - name: discovery.zen.minimum_master_nodes
           value: "{{ minimum_masters }}"
         - name: discovery.zen.ping.unicast.hosts
-          value: elastic-master
-        - name: ES_JAVA_OPTS
-          value: -Xms512m -Xmx512m
+          value: elastic-master.{{ site }}.svc.cluster.local
         - name: node.master
           value: "true"
         - name: node.data
@@ -52,6 +51,12 @@ spec:
         - name: node.ingest
           value: "false"
 {% else %}
+{% if elastic_bootstrap | default(false) | bool %}
+        - name: cluster.initial_master_nodes
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+{% endif %}
         - name: discovery.seed_hosts
           value: elastic-master
         - name: ES_JAVA_OPTS
@@ -59,6 +64,8 @@ spec:
         - name: node.roles
           value: "master"
 {% endif %}
+        - name: ES_JAVA_OPTS
+          value: -Xms512m -Xmx512m
         livenessProbe:
           httpGet:
             path: /
@@ -72,3 +79,15 @@ spec:
         - containerPort: 9300
           protocol: TCP
           name: elastic-ctrl
+{% if version is version('7.0.0', '>=') %}
+{% if not elastic_bootstrap | default(false) | bool %}
+        volumeMounts:
+        - mountPath: /usr/share/elasticsearch/data
+          name: data
+      volumes:
+      - hostPath:
+          path: {{ volume | default('') }}
+          type: ""
+        name: data
+{% endif %}
+{% endif %}

@@ -9,8 +9,9 @@
             'site': hostvars[item].site,
             'namespace': hostvars[item].namespace,
             'cluster': hostvars[item].cluster,
-            'master_volume': hostvars[item].elastic_master_volume,
-            'master_replicas': hostvars[item].master_replicas
+            'volume': hostvars[item].elastic_master_volume,
+            'master_replicas': hostvars[item].master_replicas,
+            'replicaset_name': 'elastic-master',
           }})
       }}
   loop: "{{ groups['elasticsearch'] }}"
@@ -46,6 +47,59 @@
   tags:
     - master
 
+# XXX TODO: We don't want to bootstrap everytime.  Need a 
+#           variable or some other check cluster status.
+
+- name: Create Elasticsearch Bootstrap Configuration Files
+  delegate_to: localhost
+  template:
+    src: templates/master-replicaset.j2
+    dest: configs/{{ site }}-master-bootstrap.yml
+  vars:
+    elastic_bootstrap: true
+    version: "{{ elastic_master_vars[item]['version'] }}"
+    site: "{{ elastic_master_vars[item]['site'] }}"
+    namespace: "{{ elastic_master_vars[item]['namespace'] }}"
+    master_replicas: 1
+    minimum_masters: 1
+    cluster: "{{ elastic_master_vars[item]['cluster'] }}"
+    replicaset_name: "master-bootstrap"
+    service: "master-bootstrap"
+  loop: "{{ elastic_master_vars.keys() | list }}"
+  when: |
+    elastic_master_vars[item]['version'] is version('7.0.0', '>=') and
+    create_config_files | bool
+  tags:
+    - master
+    - bootstrap
+
+- name: Bootstrap the Elasticsearch Cluster
+  become: yes
+  become_user: "{{ kubernetes_admin_user }}"
+  k8s:
+    state: present
+    definition: "{{ lookup('template', 'master-replicaset.j2') }}"
+    validate:
+      fail_on_error: no
+      strict: yes
+  vars:
+    elastic_bootstrap: true
+    version: "{{ elastic_master_vars[item]['version'] }}"
+    site: "{{ elastic_master_vars[item]['site'] }}"
+    namespace: "{{ elastic_master_vars[item]['namespace'] }}"
+    master_replicas: 1
+    minimum_masters: 1
+    cluster: "{{ elastic_master_vars[item]['cluster'] }}"
+    replicaset_name: "master-bootstrap"
+    service: "master-bootstrap"
+  loop: "{{ elastic_master_vars.keys() | list }}"
+  when: |
+    elastic_master_vars[item]['version'] is version('7.0.0', '>=') and
+    create_config_files | bool
+  tags:
+    - master
+    - bootstrap
+
 - name: Create Elasticsearch Master ReplicaSet Configuration Files
   delegate_to: localhost
   template:
@@ -58,6 +112,8 @@
     master_replicas: "{{ elastic_master_vars[item]['master_replicas'] }}"
     minimum_masters: "{{ (elastic_master_vars[item]['master_replicas'] / 2 + 1) | int }}"
     cluster: "{{ elastic_master_vars[item]['cluster'] }}"
+    replicaset_name: "{{ elastic_master_vars[item]['replicaset_name'] }}"
+    volume: "{{ elastic_master_vars[item]['volume'] }}"
   loop: "{{ elastic_master_vars.keys() | list }}"
   tags:
     - master
@@ -79,6 +135,43 @@
     master_replicas: "{{ elastic_master_vars[item]['master_replicas'] }}"
     minimum_masters: "{{ (elastic_master_vars[item]['master_replicas'] / 2 + 1) | int }}"
     cluster: "{{ elastic_master_vars[item]['cluster'] }}"
+    replicaset_name: "{{ elastic_master_vars[item]['replicaset_name'] }}"
+    volume: "{{ elastic_master_vars[item]['volume'] }}"
   loop: "{{ elastic_master_vars.keys() | list }}"
   tags:
     - master
+
+# XXX TODO: More robust cluster health check
+
+- name: Pause for Cluster to Converge
+  pause:
+    seconds: 180
+  tags:
+   - master
+
+- name: Remove the Bootstrap Node
+  become: yes
+  become_user: "{{ kubernetes_admin_user }}"
+  k8s:
+    state: absent
+    definition: "{{ lookup('template', 'master-replicaset.j2') }}"
+    validate:
+      fail_on_error: no
+      strict: yes
+  vars:
+    elastic_bootstrap: true
+    version: "{{ elastic_master_vars[item]['version'] }}"
+    site: "{{ elastic_master_vars[item]['site'] }}"
+    namespace: "{{ elastic_master_vars[item]['namespace'] }}"
+    master_replicas: 1
+    minimum_masters: 1
+    cluster: "{{ elastic_master_vars[item]['cluster'] }}"
+    replicaset_name: "master-bootstrap"
+    role: "master-bootstrap"
+  loop: "{{ elastic_master_vars.keys() | list }}"
+  when: |
+    elastic_master_vars[item]['version'] is version('7.0.0', '>=') and
+    create_config_files | bool
+  tags:
+    - master
+    - bootstrap
