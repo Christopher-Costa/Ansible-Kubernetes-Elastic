@@ -21,4 +21,10 @@
     state: present
   loop: "{{ containerd_modules }}"
 
-## Delete file:  https://github.com/containerd/containerd/issues/4581
+# https://github.com/containerd/containerd/issues/4581
+- name: Remove config.toml file
+  become: yes
+  become_user: root
+  file:
+    path: /etc/containerd/config.toml
+    state: absent 

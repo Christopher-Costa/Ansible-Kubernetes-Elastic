@@ -1,4 +1,7 @@
 ---
+
+# This probably should not be installed on the masters, but a dedicated management node
+
 - name: Install packages to manage Kubernetes with Ansible
   become: yes
   become_user: root

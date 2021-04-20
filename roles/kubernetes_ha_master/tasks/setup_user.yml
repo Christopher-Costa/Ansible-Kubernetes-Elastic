@@ -47,8 +47,3 @@
   register: kubernetes_certificate_authority_data
   tags:
     - user
-
-- debug:
-    var: kubernetes_certificate_authority_data
-  tags:
-    - user
