@@ -93,3 +93,7 @@ all:
     docker_version: 19.03.2
     kubernetes_version: 1.20.5-0
     kubernetes_admin_user: kubeadm
+    kubernetes_users:
+      - user1
+      - user2
+      - user3

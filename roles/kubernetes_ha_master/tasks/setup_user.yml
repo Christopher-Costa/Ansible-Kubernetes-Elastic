@@ -1,23 +1,54 @@
 ---
-- name: Create .kube directory
+- name: Create .kube directory for {{ kubernetes_admin_user }} account
   become: yes
   become_user: "{{ kubernetes_admin_user }}"
   file:
     name: ~{{ kubernetes_admin_user}}/.kube
     state: directory
+  tags:
+    - user
 
-- name: Copy config file
+- name: Copy config file into {{ kubernetes_admin_user }} home
   become: yes
   become_user: root
   command: cp -i /etc/kubernetes/admin.conf ~{{ kubernetes_admin_user }}/.kube/config
   args:
-    creates: ~{{ kubernetes_admin_user}}/.kube/config 
+    creates: /home/{{ kubernetes_admin_user}}/.kube/config 
+  tags:
+    - user
 
 - name: Set config file ownership
   become: yes
   become_user: root
   file:
-    path: ~{{ kubernetes_admin_user }}/.kube/config
+    path: /home/{{ kubernetes_admin_user }}/.kube/config
     owner: "{{ kubernetes_admin_user }}"
     group: "{{ kubernetes_admin_group }}"
     state: file
+  tags:
+    - user
+
+- name: Create .kube directory for other kubernetes userss
+  become: yes
+  become_user: "{{ item }}"
+  file:
+    name: /home/{{ item }}/.kube
+    state: directory
+  loop: "{{ kubernetes_users }}"
+  tags:
+    - user
+
+- name: Get the Kubernetes CA Certificate
+  become: yes
+  become_user: "{{ kubernetes_admin_user }}"
+  shell: >
+    kubectl config view --raw
+    -o=jsonpath="{.clusters[0].cluster.certificate-authority-data}"
+  register: kubernetes_certificate_authority_data
+  tags:
+    - user
+
+- debug:
+    var: kubernetes_certificate_authority_data
+  tags:
+    - user

@@ -16,6 +16,7 @@
       tags: initialize
  
     - include_tasks: setup_user.yml
+      tags: user
 
     - include_tasks: networking.yml
       tags: networking
@@ -26,4 +27,5 @@
       tags: join
 
     - include_tasks: setup_user.yml
+      tags: user
   when: not bootstrap | default(false)

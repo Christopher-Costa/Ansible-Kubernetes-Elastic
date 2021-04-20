@@ -17,3 +17,13 @@
     state: present
   tags:
     - user
+
+- name: Create kubernetes admin accounts
+  become: yes
+  become_user: root
+  user:
+    name: "{{ item }}"
+    state: present
+  loop:  "{{ kubernetes_users }}"
+  tags:
+    - user
