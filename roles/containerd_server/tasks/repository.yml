@@ -1,0 +1,12 @@
+---
+- name: Add docker-ce repository
+  become: yes
+  become_user: root
+  yum_repository:
+    name: docker-ce-stable
+    description: Docker CE Stable - $basearch
+    baseurl: https://download.docker.com/linux/centos/7/$basearch/stable
+    gpgcheck: yes
+    gpgkey: https://download.docker.com/linux/centos/gpg
+  tags:
+    - respository

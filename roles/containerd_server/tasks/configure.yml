@@ -1,0 +1,24 @@
+---
+- name: Set containerd modules to load
+  become: yes
+  become_user: root
+  blockinfile:
+    path: /etc/modules-load.d/containerd.conf
+    create: yes
+    marker: "# {mark} ANSIBLE MANAGED MODULE LOAD CONFIGURATION"
+    block: |
+      {% for module in containerd_modules %}
+      {{ module }}
+      {% endfor %}
+  tags:
+  - configure
+    
+- name: Load modules for containerd
+  become: yes
+  become_user: root
+  modprobe:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ containerd_modules }}"
+
+## Delete file:  https://github.com/containerd/containerd/issues/4581

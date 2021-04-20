@@ -3,3 +3,5 @@ kubernetes_service_user: kubernetes
 kubernetes_service_group: kubernetes
 kubernetes_service_uid: 1000
 kubernetes_service_gid: 1000
+
+kubernetes_container_runtime: containerd

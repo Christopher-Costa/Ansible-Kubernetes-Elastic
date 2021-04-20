@@ -2,28 +2,28 @@ all:
   children:
     kubernetes_load_balancers:
       hosts:
-        loadbalancer:
-          ip_address: 10.10.111.130
+        lb.costa.lab:
+          ip_address: 10.10.111.140
 
     kubernetes_masters:
       hosts:
         master1.costa.lab:
           name: master1
-          ip_address: 10.10.111.131 
+          ip_address: 10.10.111.141 
           bootstrap: True
         master2.costa.lab:
           name: master2 
-          ip_address: 10.10.111.132
+          ip_address: 10.10.111.142
         master3.costa.lab:
           name: master3
-          ip_address: 10.10.111.133
+          ip_address: 10.10.111.143
 
 ###################################
 # kubernetes_masters vars
 ###################################
       vars:
         kubernetes_bootstrap_master: master1.costa.lab
-        load_balancer_ip_address: 10.10.111.130
+        load_balancer_ip_address: 10.10.111.140
 
     kubernetes_nodes:
       children:
@@ -33,16 +33,16 @@ all:
               hosts:
                 worker1.costa.lab: 
                   name: worker1
-                  ip_address: 10.10.111.134
+                  ip_address: 10.10.111.144
                 worker2.costa.lab:
                   name: worker2
-                  ip_address: 10.10.111.135
+                  ip_address: 10.10.111.145
 
 ###################################
 # elasticsearch site1 vars
 ###################################
               vars:
-                elasticsearch_version: 6.8.4
+                elasticsearch_version: 7.11.0
                 site: site1
                 cluster: site1
                 namespace: site1
@@ -53,10 +53,10 @@ all:
               hosts:
                 worker3.costa.lab:
                   name: worker3
-                  ip_address: 10.10.111.136
+                  ip_address: 10.10.111.146
                 worker4.costa.lab:
                   name: worker4
-                  ip_address: 10.10.111.137
+                  ip_address: 10.10.111.147
 
 ###################################
 # elasticsearch site2 vars
@@ -91,7 +91,7 @@ all:
 ##################################
   vars:
     docker_version: 19.03.2
-    kubernetes_version: 1.20.5-0
+    kubernetes_version: 1.21.2-0
     kubernetes_admin_user: kubeadm
     kubernetes_users:
       - user1

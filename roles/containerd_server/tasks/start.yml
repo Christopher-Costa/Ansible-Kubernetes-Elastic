@@ -1,0 +1,10 @@
+---
+- name: Start containerd
+  become: yes
+  become_user: root
+  systemd:
+    state: started
+    enabled: yes
+    name: containerd
+  tags:
+    - start

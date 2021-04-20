@@ -1,0 +1,16 @@
+---
+- include_tasks: repository.yml
+  tags:
+    - repository
+
+- include_tasks: install.yml
+  tags:
+    - install
+
+- include_tasks: configure.yml
+  tags:
+    - configure
+
+- include_tasks: start.yml
+  tags:
+    - start

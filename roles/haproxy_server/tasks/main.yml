@@ -4,5 +4,6 @@
   become_user: root
   yum:
     name:
+      - libsemanage-python
       - haproxy
     state: latest

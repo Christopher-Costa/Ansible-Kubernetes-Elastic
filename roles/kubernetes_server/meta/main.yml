@@ -1,3 +1,7 @@
 ---
 dependencies:
+  - role: containerd_server
+    when: kubernetes_container_runtime == 'containerd'
+
   - role: docker_server
+    when: kubernetes_container_runtime == 'docker'

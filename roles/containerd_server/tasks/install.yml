@@ -1,0 +1,9 @@
+---
+- name: Install containerd package
+  become: yes
+  become_user: root
+  yum:
+    name: containerd.io
+    state: present
+  tags:
+    - install

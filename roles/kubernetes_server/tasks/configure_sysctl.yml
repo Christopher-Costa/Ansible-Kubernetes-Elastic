@@ -9,3 +9,15 @@
     sysctl_set: yes
     state: present
     reload: yes
+
+- name: Set sysctl parameters for containerd
+  become: yes
+  become_user: root
+  sysctl:
+    sysctl_file: /etc/sysctl.conf
+    name: net.bridge.bridge-nf-call-iptables
+    value: "1"
+    sysctl_set: yes
+    state: present
+    reload: yes
+  when: kubernetes_container_runtime == 'containerd'

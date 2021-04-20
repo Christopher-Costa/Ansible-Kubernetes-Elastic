@@ -8,6 +8,7 @@
     - user
 
 - include_tasks: update_docker.yml
+  when: kubernetes_container_runtime == 'docker'
   tags:
     - docker
 
