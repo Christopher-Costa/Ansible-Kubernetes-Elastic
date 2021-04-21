@@ -5,6 +5,8 @@
   shell: kubectl get ClusterRole
   register: kube_clusterroles
   changed_when: no
+  tags:
+    - networking
 
 - name: Install flannel networking plugin
   become: yes
@@ -12,3 +14,16 @@
   shell: kubectl apply -f {{ flannel_location }}
   when:
     - kube_clusterroles.stdout is not regex("\sflannel\s")
+    - kubernetes_cni == "flannel"
+  tags:
+    - networking
+
+- name: Install canal networking plugin
+  become: yes
+  become_user: "{{ kubernetes_admin_user }}"
+  shell: kubectl apply -f {{ canal_location }}
+  when:
+    - kube_clusterroles.stdout is not regex("\scanal\s")
+    - kubernetes_cni == "canal"
+  tags:
+    - networking

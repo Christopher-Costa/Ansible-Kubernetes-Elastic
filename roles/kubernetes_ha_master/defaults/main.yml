@@ -3,4 +3,6 @@ kubernetes_admin_group: kubeadm
 
 pod_network_cidr: 10.10.0.0/16
 service_cidr: 10.11.0.0/16
+kubernetes_cni: canal
 flannel_location: https://raw.githubusercontent.com/flannel-io/flannel/v0.13.0/Documentation/kube-flannel.yml
+canal_location: https://docs.projectcalico.org/manifests/canal.yaml
