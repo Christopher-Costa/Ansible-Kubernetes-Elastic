@@ -27,23 +27,3 @@
     state: file
   tags:
     - user
-
-- name: Create .kube directory for other kubernetes userss
-  become: yes
-  become_user: "{{ item }}"
-  file:
-    name: /home/{{ item }}/.kube
-    state: directory
-  loop: "{{ kubernetes_users }}"
-  tags:
-    - user
-
-- name: Get the Kubernetes CA Certificate
-  become: yes
-  become_user: "{{ kubernetes_admin_user }}"
-  shell: >
-    kubectl config view --raw
-    -o=jsonpath="{.clusters[0].cluster.certificate-authority-data}"
-  register: kubernetes_certificate_authority_data
-  tags:
-    - user
